@@ -10,10 +10,10 @@ const { sanitizeBody } = require("express-validator/filter")
 
 // import models
 var User = require("../models/user")
-var Course = require("../models/course")
+var Stats = require("../models/stats")
 const { MongoError } = require("mongodb")
 
-let title = "Grade Book"
+let title = "Leaderboard"
 
 function userLoggedIn(req, res) {
   let user = req.session.user
@@ -30,7 +30,7 @@ router.get("/", function (req, res, next) {
 router.get("/dashboard", (req, res, next) => {
   let user = userLoggedIn(req, res)
     res.render("dashboard", {
-      title: "Gradebook Dashboard",
+      title: "Leaderboard Dashboard",
       user: user,
   })
 })
@@ -77,11 +77,7 @@ router.post(
   [
     // Validate fields.
     // express-validator
-    check("firstName", "First name must not be empty")
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage('must be at least 1 character'),
-    check("lastName", "Last name must not be empty.")
+    check("userName", "Username must not be empty.")
       .trim()
       .isLength({ min: 1 }),
     check("email", "Email must not be empty.")
@@ -115,14 +111,13 @@ router.post(
       let context = {
         title: "Register",
         errors: errors.array(),
-        firstName: req.body.firstName
+        userName: req.body.userName
       }
       res.render("register", context)
     } else {
       // create a user document and insert into mongodb collection
       let user = new User({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
+        userName: req.body.userName,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10)
       })
@@ -146,7 +141,7 @@ router.get("/logout", (req, res, next) => {
   var user = req.session.user
   if (user) {
     req.session.destroy(function () {
-      console.log(`user: ${user.email} logged out...`)
+      console.log(`user: ${user.userName} logged out...`)
     })
   }
   res.redirect("/")
@@ -164,8 +159,7 @@ router.post("/profile", function (req, res, next) {
   var condition = { _id: user._id }
   var update = {
     email: req.body.email,
-    firstName: req.body.fname,
-    lastName: req.body.lname
+    userName: req.body.uname,
   }
   var options = {}
   User.updateOne(condition, update, options, (err, numAffected) => {
@@ -184,63 +178,29 @@ router.post("/profile", function (req, res, next) {
   })
 })
 
-router.get("/courses", function (req, res, next) {
+router.get("/stats", function (req, res, next) {
   // get logged in user
   let user = userLoggedIn(req, res)
   Course.find({user_id: user._id}, (err, courses) => {
     if (err) throw err;
     //console.log(courses)
-    res.render("courses", {
-      title: "All courses",
-      courses: courses,
+    res.render("stats", {
+      title: "All stats",
+      stats: stats,
       errors: []
     })
   });
 })
 
-// Individual course page...
-// *? optional request parameter
-router.get("/course/:id?", function (req, res, next) {
-  // get logged in user
-  var user = userLoggedIn(req, res)
-  var courseID = req.params.id
-  if (courseID) {
-    console.log(`courseID: ${courseID}`)
-    var course = Course.findOne({ _id: courseID }, function (err, course) {
-      res.render("./components/course", {
-        title: "Update existing course",
-        course: course,
-        errors: []
-      })
-    })
-  } else {
-    res.render("./components/course", {
-      title: "Add a new course",
-      course: null,
-      errors: []
-    })
-  }
-})
-
 // either add new or update existing course
 // optional course_id
 router.post(
-  "/course/:id?",
+  "/stats",
   [
     // Validate fields.
-    check("name", "Short name must not be empty.")
+    check("level", "level must not be empty.")
       .trim()
       .isLength({ min: 1 }),
-    check("fullName", "Full name must not be empty.")
-      .trim()
-      .isLength({ min: 1 }),
-    check("crn", "CRN must not be empty.")
-      .trim()
-      .isLength({ min: 1 }),
-    // email must be valid
-    check("section", "Section must not be empty.")
-      .isLength({ min: 1 })
-      .trim(),
     // Sanitize fields.
     sanitizeBody("*")
       .trim()
@@ -254,17 +214,15 @@ router.post(
     // check if there are errors
     if (!errors.isEmpty()) {
       let context = {
-        title: "Add a new course",
+        title: "Add a new score",
         errors: errors.array()
       }
-      res.render("./components/course", context)
+      res.render("./components/stat", context)
     } else {
       // create a user document and insert into mongodb collection
-      let course = {
+      let stat = {
         name: req.body.name,
-        fullName: req.body.fullName,
-        crn: req.body.crn,
-        section: req.body.section,
+        level: req.body.level,
         user_id: user._id
       }
       // check if data is there on console
@@ -283,17 +241,17 @@ router.post(
       }
       // add new course
       else {
-        addCourse(res, course).then((errors) => {
+        addStat(res, stat).then((errors) => {
           console.log('Errors: ', errors)
           if (errors && errors.length !== 0) {
             let context = {
-              title: "Add a new course",
+              title: "Add a new score",
               errors: errors
             }
-            res.render("./components/course", context)
+            res.render("./components/stat", context)
           }
           else {
-            res.redirect("/courses")
+            res.redirect("/stats")
           }
         })
       }
@@ -315,8 +273,8 @@ function updateCourse(res, id, course) {
   })
 }
 
-async function addCourse(res, course) {
-  var c = new Course(course)
+async function addStat(res, stat) {
+  var c = new Stat(stat)
   try {
     await c.save();
   }
