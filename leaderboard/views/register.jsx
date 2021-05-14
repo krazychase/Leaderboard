@@ -9,10 +9,7 @@ function Register(props) {
       <Message messages={props.errors} />
       <form method="POST" action="/register">
         <label>
-          <input type="text" name="firstName" required placeholder="First Name" />
-        </label><br />
-        <label>
-          <input type="text" name="lastName" required placeholder="Last Name" />
+          <input type="text" name="userName" required placeholder="Username" />
         </label><br />
         <label>
           <input type="text" name="email" required placeholder="Email" />
