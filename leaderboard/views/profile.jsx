@@ -10,8 +10,7 @@ class Profile extends React.Component{
       title: props.title,
       msg : "",
       email : props.user.email,
-      firstName : props.user.firstName,
-      lastName : props.user.lastName,
+      userName : props.user.userName
     };
     // this is not working with static server-side rendering React
     //this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,12 +27,9 @@ class Profile extends React.Component{
           <label>Email: 
             <input type="text" name="email" required value={this.state.email} onChange={this.handleInputChange} /> 
           </label><br />
-          <label>First Name: 
-            <input type="text" name="fname" required value={this.state.firstName} onChange={this.handleInputChange} />
+          <label>Userame: 
+            <input type="text" name="uname" required value={this.state.userName} onChange={this.handleInputChange} />
           </label> <br />
-          <label>Last Name:
-            <input type="text" name="lname" required value={this.state.lastName} onChange={this.handleInputChange} />
-          </label><br /><br />
           <button type="submit">Update</button>
         </form>
       </Layout>
@@ -61,8 +57,7 @@ class Profile extends React.Component{
       },
       body: JSON.stringify({
         email: this.state.email,
-        fname: this.state.firstName,
-        lname: this.state.lastName
+        uname: this.state.userName
       }),
     })
     .then(result => result.json())
@@ -70,8 +65,7 @@ class Profile extends React.Component{
       this.setState({
         msg: json.msg,
         email: json.email,
-        firstName: json.firstName,
-        lastName: json.lastName,
+        userName: json.userName
       });
     })
   }

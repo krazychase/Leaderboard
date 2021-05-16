@@ -10,7 +10,7 @@ const { sanitizeBody } = require("express-validator/filter")
 
 // import models
 var User = require("../models/user")
-var Stats = require("../models/stats")
+var Stat = require("../models/stats")
 const { MongoError } = require("mongodb")
 
 let title = "Leaderboard"
@@ -181,9 +181,9 @@ router.post("/profile", function (req, res, next) {
 router.get("/stats", function (req, res, next) {
   // get logged in user
   let user = userLoggedIn(req, res)
-  Course.find({user_id: user._id}, (err, courses) => {
+  Stat.find({user_id: user._id}, (err, stats) => {
     if (err) throw err;
-    //console.log(courses)
+    //console.log(stats)
     res.render("stats", {
       title: "All stats",
       stats: stats,
@@ -192,10 +192,10 @@ router.get("/stats", function (req, res, next) {
   });
 })
 
-// either add new or update existing course
-// optional course_id
+// either add new or update existing stat
+// optional stat_id
 router.post(
-  "/stats",
+  "/stats/add",
   [
     // Validate fields.
     check("level", "level must not be empty.")
@@ -226,20 +226,20 @@ router.post(
         user_id: user._id
       }
       // check if data is there on console
-      console.log(course)
-      // check if the form data is for update or new course
+      console.log(stat)
+      // check if the form data is for update or new stat
       var id = req.params.id
       if (id) {
         // update
-        updateCourse(res, id, course)
+        updateStat(res, id, stat)
         let context = {
-          title: "Update course",
-          errors: [{msg: "Course updated successfully!"}],
-          course: course
+          title: "Update stat",
+          errors: [{msg: "Stat updated successfully!"}],
+          stat: stat
         }
-        res.render("./components/course", context)
+        res.render("./components/stat", context)
       }
-      // add new course
+      // add new stat
       else {
         addStat(res, stat).then((errors) => {
           console.log('Errors: ', errors)
@@ -256,16 +256,16 @@ router.post(
         })
       }
       // successful - redirect to dashboard
-      //res.redirect("/courses")
+      //res.redirect("/stats")
     }
   }
 )
 
-function updateCourse(res, id, course) {
+function updateStat(res, id, stat) {
   var condition = { _id: id }
   var option = {}
   var update = {}
-  Course.updateOne(condition, course, option, (err, rowsAffected) => {
+  Stat.updateOne(condition, stat, option, (err, rowsAffected) => {
     if (err) {
       console.log(`caught the error: ${err}`)
       return res.status(500).json(err);
@@ -289,19 +289,19 @@ async function addStat(res, stat) {
   }
 }
 
-// either add new or update existing course
-router.post("/deletecourse", function (req, res, next) {
+// either add new or update existing stat
+router.post("/deletestat", function (req, res, next) {
   // create a user document and insert into mongodb collection
   console.log(req.body)
   let query = {
-    id: req.body.courseID
+    id: req.body.statID
   }
   // check if data is there on console
   console.log(query)
-  Course.deleteOne(query, function (err) {
+  Stat.deleteOne(query, function (err) {
     if (err) throw err
     else {
-      console.log(`Deleted course id: ${query}`)
+      console.log(`Deleted stat id: ${query}`)
       res.redirect("/grade")
     }
   })

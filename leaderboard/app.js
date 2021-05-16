@@ -16,7 +16,7 @@ const username = 'paste username';
 const password = 'paste password'
 const db_name = 'gradebook-v2'
 //FIXME change the URL @cluster address!
-var mongo_db_url = `mongodb+srv://${username}:${password}@cluster0.qdxhi.mongodb.net/${db_name}?retryWrites=true&w=majority`
+var mongo_db_url = `mongodb+srv://test-user:breakout@leaderboard.cyl27.mongodb.net/mBreakout?retryWrites=true&w=majority`
 
 var mongoDB = process.env.MONGODB_URI || mongo_db_url
 mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true})
