@@ -3,7 +3,7 @@ import Layout from '../layout';
 import Message from './message';
 
 function Stat(props) {
-  let action = "/stat/"
+  let action = "/stats/"
   if (props.stat) 
     action += props.stat._id
 
@@ -13,10 +13,10 @@ function Stat(props) {
       <Message messages={props.errors} />
       <form method="POST" action={action}>
         <label>
-          <input type="text" name="name" required placeholder="name" value={(props.stat)? props.stat.name : null } />
+          <input type="text" name="name" required placeholder="Username" value={(props.stat)? props.stat.name : null } />
         </label><br />
         <label>
-          <input type="text" name="level" required placeholder="level" value={(props.stat)?props.stat.level:null}/>
+          <input type="text" name="score" required placeholder="Level" value={(props.stat)?props.stat.level:null}/>
         </label><br />
         <br /> <br />
         <button type="submit">Save</button>

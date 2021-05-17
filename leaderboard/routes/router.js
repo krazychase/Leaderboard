@@ -185,20 +185,45 @@ router.get("/stats", function (req, res, next) {
     if (err) throw err;
     //console.log(stats)
     res.render("stats", {
-      title: "All stats",
+      title: "All scores",
       stats: stats,
       errors: []
     })
   });
 })
 
+router.get("/stats/:id?", function (req, res, next) {
+  // get logged in user
+  var user = userLoggedIn(req, res)
+  var statID = req.params.id
+  if (statID) {
+    console.log(`statID: ${statID}`)
+    var stat = Stat.findOne({ _id: statID }, function (err, stat) {
+      res.render("./components/stat", {
+        title: "Update existing score",
+        stat: stat,
+        errors: []
+      })
+    })
+  } else {
+    res.render("./components/stat", {
+      title: "Add a new score",
+      stat: null,
+      errors: []
+    })
+  }
+})
+
 // either add new or update existing stat
 // optional stat_id
 router.post(
-  "/stats/add",
+  "/stats/:id?",
   [
     // Validate fields.
-    check("level", "level must not be empty.")
+    check("name", "Username must not be empty.")
+      .trim()
+      .isLength({ min: 1 }),
+    check("score", "Level must not be empty.")
       .trim()
       .isLength({ min: 1 }),
     // Sanitize fields.
@@ -222,7 +247,7 @@ router.post(
       // create a user document and insert into mongodb collection
       let stat = {
         name: req.body.name,
-        level: req.body.level,
+        score: req.body.score,
         user_id: user._id
       }
       // check if data is there on console
@@ -233,8 +258,8 @@ router.post(
         // update
         updateStat(res, id, stat)
         let context = {
-          title: "Update stat",
-          errors: [{msg: "Stat updated successfully!"}],
+          title: "Update score",
+          errors: [{msg: "score updated successfully!"}],
           stat: stat
         }
         res.render("./components/stat", context)

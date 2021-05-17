@@ -11,8 +11,7 @@ function StatsTable(props) {
         </thead>
         {
           props.stats.map(stat => (
-            <tr>
-              <td>{stat.name}</td>
+            <tr><td><a href={"/stats/" + stat._id}>{stat.name}</a></td>
               <td>{stat.score}</td>
             </tr>
           ))
@@ -27,12 +26,12 @@ export default function Stats(props) {
   if (props.stats.length > 0) 
     stats = <StatsTable stats={props.stats} />
   else
-    stats = <p>No scores found. <a href="/stats/add">Add a new score</a></p>
+    stats = <p>No scores found. <a href="/stats/">Add a new score</a></p>
 
   return (
     <Layout title={props.title}>
       <h1>{props.title}</h1>
-      <a href="/dashboard/">Dashboard</a> | <a href="/users/profile">Profile</a> | <a href="/stats/add">New Score</a> | <a href="/logout">Log out</a>
+      <a href="/dashboard/">Dashboard</a> | <a href="/users/profile">Profile</a> | <a href="/stats/">New Score</a> | <a href="/logout">Log out</a>
       <h3>All scores</h3>
       {stats}
     </Layout>
